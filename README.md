@@ -57,7 +57,7 @@ The analysis integrates descriptive statistics, inferential modeling (chi-square
 ├── Transport_Analysis.Rmd          # Main R Markdown file
 ├── Transport_Analysis.html / pdf   # Rendered output
 └── README.md                       # This file
-▶ How to Reproduce the Analysis
+ How to Reproduce the Analysis
 Clone the repository
 git clone https://github.com/yourusername/kumasi-transport-analysis.git
 Open the R Markdown file
