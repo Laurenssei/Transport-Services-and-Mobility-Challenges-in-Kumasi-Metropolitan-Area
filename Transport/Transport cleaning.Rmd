@@ -1,0 +1,268 @@
+
+
+```{r}
+# Load required libraries
+library(readxl)
+library(dplyr)
+library(janitor)
+library(stringr)
+
+# ============================================================================
+# DATASET 1: PASSENGERS TRANSPORT MOBILITY
+# ============================================================================
+
+# Read and clean the passengers dataset
+passengers <- read_excel("Documents/Passengers_transport_mobility.xlsx") %>% 
+  clean_names()
+
+# Rename columns for better clarity
+passengers_clean <- passengers %>%
+  rename(
+    # Route information
+    study_route = selected_study_route,
+    
+    # Section A: Demographics
+    gender = x1_gender_of_respondent,
+    age_group = x2_age_group,
+    marital_status = x3_marital_status,
+    education_level = x4_highest_educational_level_attained,
+    occupation = x5_what_is_your_occupation,
+    monthly_income = x6_monthly_income_level_in_ghana_cedis,
+    length_of_stay = x7_length_of_stay_in_kumasi,
+    primary_transport_mode = x8_primary_mode_of_transport_used_daily,
+    uses_trotro = x8_primary_mode_of_transport_used_daily_trotro_minibus,
+    uses_taxi = x8_primary_mode_of_transport_used_daily_taxi,
+    uses_tricycle = x8_primary_mode_of_transport_used_daily_tricycle_pragya,
+    uses_motorcycle = x8_primary_mode_of_transport_used_daily_motorcycle_okada,
+    travel_purpose = x9_purpose_of_daily_travel,
+    travels_for_work = x9_purpose_of_daily_travel_work_business,
+    travels_for_school = x9_purpose_of_daily_travel_school_education,
+    travels_for_shopping = x9_purpose_of_daily_travel_shopping_errands,
+    travels_for_social = x9_purpose_of_daily_travel_social_religious_activities,
+    transport_frequency_weekly = x10_how_often_do_you_use_public_transport_in_a_week,
+    
+    # Section B: Service Quality
+    fare_per_trip = x11_how_much_do_you_pay_for_transport_per_trip,
+    fare_affordability = x12_how_do_you_rate_the_affordability_of_transport_fares,
+    schedule_reliability = x13_how_satisfied_are_you_with_the_reliability_of_public_transport_schedules,
+    vehicle_comfort = x14_how_do_you_rate_the_comfort_of_vehicles_used_for_public_transport,
+    service_safety = x15_how_do_you_rate_the_safety_of_public_transport_services,
+    driver_courtesy = x16_how_do_you_rate_the_courtesy_of_drivers_conductors_towards_passengers,
+    
+    # Section C: Challenges
+    common_problems = x17_what_is_the_most_common_problem_you_encounter_with_transport_services,
+    problem_long_waiting = x17_what_is_the_most_common_problem_you_encounter_with_transport_services_long_waiting_times,
+    problem_overcrowding = x17_what_is_the_most_common_problem_you_encounter_with_transport_services_overcrowding,
+    problem_high_fares = x17_what_is_the_most_common_problem_you_encounter_with_transport_services_high_fares,
+    problem_reckless_driving = x17_what_is_the_most_common_problem_you_encounter_with_transport_services_reckless_driving,
+    problem_poor_roads = x17_what_is_the_most_common_problem_you_encounter_with_transport_services_poor_road_conditions,
+    delay_frequency = x18_how_frequently_do_you_experience_delays_in_reaching_your_destination,
+    accident_concern = x19_what_is_your_level_of_concern_about_road_accidents_in_kumasi,
+    faces_harassment = x20_do_you_face_harassment_or_discrimination_while_using_transport_services_e_g_gender_disability_age,
+    transport_choice_factors = x21_what_factor_influences_your_choice_of_transport_mode,
+    choice_factor_cost = x21_what_factor_influences_your_choice_of_transport_mode_cost,
+    choice_factor_speed = x21_what_factor_influences_your_choice_of_transport_mode_speed,
+    choice_factor_comfort = x21_what_factor_influences_your_choice_of_transport_mode_comfort,
+    choice_factor_safety = x21_what_factor_influences_your_choice_of_transport_mode_safety,
+    choice_factor_availability = x21_what_factor_influences_your_choice_of_transport_mode_availability,
+    
+    # Section D: Mobility Challenges
+    congestion_level = x22_how_would_you_describe_traffic_congestion_in_kumasi,
+    peak_traffic_time = x23_at_what_time_of_day_do_you_mostly_face_traffic_delays,
+    daily_traffic_time = x24_how_much_time_do_you_spend_in_traffic_daily_one_way,
+    road_network_adequate = x25_do_you_think_the_road_network_in_kumasi_adequately_supports_mobility,
+    greatest_mobility_challenges = x26_which_group_do_you_think_faces_the_greatest_mobility_challenges,
+    challenge_workers = x26_which_group_do_you_think_faces_the_greatest_mobility_challenges_workers,
+    challenge_students = x26_which_group_do_you_think_faces_the_greatest_mobility_challenges_students,
+    challenge_traders = x26_which_group_do_you_think_faces_the_greatest_mobility_challenges_traders_market_women,
+    challenge_disabled = x26_which_group_do_you_think_faces_the_greatest_mobility_challenges_persons_with_disabilities,
+    challenge_elderly = x26_which_group_do_you_think_faces_the_greatest_mobility_challenges_elderly,
+    
+    # Section E: Coping Strategies
+    coping_strategies = x27_what_do_you_usually_do_to_cope_with_transport_delays,
+    coping_leave_early = x27_what_do_you_usually_do_to_cope_with_transport_delays_leave_home_early,
+    coping_alt_routes = x27_what_do_you_usually_do_to_cope_with_transport_delays_use_alternative_routes,
+    coping_switch_mode = x27_what_do_you_usually_do_to_cope_with_transport_delays_switch_to_another_transport_mode,
+    coping_wait_patiently = x27_what_do_you_usually_do_to_cope_with_transport_delays_wait_patiently,
+    switched_transport_mode = x28_have_you_ever_switched_your_main_transport_mode_due_to_challenges,
+    more_buses_helpful = x29_do_you_think_introducing_more_buses_would_reduce_transport_challenges,
+    infrastructure_improvements = x30_what_infrastructure_improvement_would_improve_mobility_in_kumasi,
+    improve_expand_roads = x30_what_infrastructure_improvement_would_improve_mobility_in_kumasi_expanding_road_networks,
+    improve_walkways = x30_what_infrastructure_improvement_would_improve_mobility_in_kumasi_building_pedestrian_walkways,
+    improve_brt = x30_what_infrastructure_improvement_would_improve_mobility_in_kumasi_developing_bus_rapid_transit_brt,
+    improve_traffic_mgmt = x30_what_infrastructure_improvement_would_improve_mobility_in_kumasi_improving_traffic_management_systems,
+    transport_unions_role = x31_how_do_you_view_the_role_of_transport_unions_in_improving_services,
+    
+    # Section F: General Perceptions
+    overall_service_quality = x32_how_do_you_rate_the_overall_quality_of_transport_services_in_kumasi,
+    accessible_to_low_income = x33_do_you_feel_that_transport_services_are_accessible_to_low_income_earners,
+    biggest_transport_problem = x34_in_your_opinion_what_is_the_biggest_transport_problem_in_kumasi,
+    biggest_problem_congestion = x34_in_your_opinion_what_is_the_biggest_transport_problem_in_kumasi_congestion,
+    biggest_problem_inadequate = x34_in_your_opinion_what_is_the_biggest_transport_problem_in_kumasi_inadequate_services,
+    biggest_problem_infrastructure = x34_in_your_opinion_what_is_the_biggest_transport_problem_in_kumasi_poor_infrastructure,
+    biggest_problem_fares = x34_in_your_opinion_what_is_the_biggest_transport_problem_in_kumasi_high_fares,
+    biggest_problem_safety = x34_in_your_opinion_what_is_the_biggest_transport_problem_in_kumasi_safety_issues,
+    govt_intervention_needed = x35_do_you_think_government_intervention_is_necessary_to_improve_public_transport_in_kumasi,
+    support_modern_systems = x36_would_you_support_the_introduction_of_modern_transport_systems_e_g_light_rail_brt_in_kumasi
+  ) %>%
+  select(-starts_with("section_"))  # Remove section header columns
+
+# Additional cleaning for passengers dataset
+passengers_clean <- passengers_clean %>%
+  mutate(
+    # Standardize text responses
+    gender = str_trim(gender),
+    age_group = str_trim(age_group),
+    
+    # Convert binary text to logical
+    faces_harassment = case_when(
+      faces_harassment == "Yes" ~ TRUE,
+      faces_harassment == "No" ~ FALSE,
+      TRUE ~ NA
+    ),
+    switched_transport_mode = case_when(
+      switched_transport_mode == "Yes" ~ TRUE,
+      switched_transport_mode == "No" ~ FALSE,
+      TRUE ~ NA
+    ),
+    road_network_adequate = case_when(
+      road_network_adequate == "Yes" ~ TRUE,
+      road_network_adequate == "No" ~ FALSE,
+      TRUE ~ NA
+    ),
+    accessible_to_low_income = case_when(
+      accessible_to_low_income == "Yes" ~ TRUE,
+      accessible_to_low_income == "No" ~ FALSE,
+      TRUE ~ NA
+    ),
+    support_modern_systems = case_when(
+      support_modern_systems == "Yes" ~ TRUE,
+      support_modern_systems == "No" ~ FALSE,
+      TRUE ~ NA
+    )
+  )
+
+
+# ============================================================================
+# DATASET 2: DRIVERS/TRANSPORT OPERATORS
+# ============================================================================
+
+# Read and clean the drivers dataset
+drivers <- read_excel("Documents/DRIVERS__TRANSPORT_OPERATORS._-_all_versions.xlsx") %>% 
+  clean_names()
+
+# Rename columns for better clarity
+drivers_clean <- drivers %>%
+  rename(
+    study_route = selected_study_route,
+    gender = x1_gender_of_respondent_sex,
+    age_group = x2_age_group_of_respondents,
+    education_level = x3_educational_leve_of_drivers,
+    transport_service_type = x4_type_of_transport_service_operated,
+    service_type_other_specify = please_specify,
+    driving_experience_years = x5_years_of_driving_experience,
+    operation_area = x6_which_part_of_kumasi_do_you_mainly_operate_in,
+    work_time = x7_what_time_of_day_do_you_mostly_work,
+    daily_trips = x8_how_many_trips_do_you_usually_make_in_a_day,
+    belongs_to_union = x9_do_you_belong_to_a_recognized_transport_union_or_association,
+    union_name = x10_if_yes_which_association,
+    union_other_specify = please_specify_2,
+    road_condition = x11_how_would_you_describe_the_current_condition_of_roads_on_your_route,
+    congestion_frequency = x12_how_often_do_you_experience_traffic_congestion_on_your_route,
+    congestion_causes = x13_what_do_you_think_are_the_main_causes_of_traffic_congestion_in_kumasi_select_all_that_apply,
+    cause_poor_roads = x13_what_do_you_think_are_the_main_causes_of_traffic_congestion_in_kumasi_select_all_that_apply_a_poor_road_network,
+    cause_indiscipline = x13_what_do_you_think_are_the_main_causes_of_traffic_congestion_in_kumasi_select_all_that_apply_b_indiscipline_by_drivers,
+    cause_street_trading = x13_what_do_you_think_are_the_main_causes_of_traffic_congestion_in_kumasi_select_all_that_apply_c_street_trading_and_hawking,
+    cause_poor_traffic_control = x13_what_do_you_think_are_the_main_causes_of_traffic_congestion_in_kumasi_select_all_that_apply_d_poor_traffic_control,
+    cause_lack_parking = x13_what_do_you_think_are_the_main_causes_of_traffic_congestion_in_kumasi_select_all_that_apply_e_lack_of_parking_space,
+    terminal_availability = x14_how_would_you_rate_the_availability_of_transport_terminals_or_loading_bays_in_your_area,
+    encounters_challenges_authorities = x15_do_you_encounter_challenges_with_city_guards_or_police_officers_during_work,
+    challenges_details = please_specify_briefly,
+    regulation_effectiveness = x16_how_effective_are_transport_regulations_in_kumasi,
+    relationship_with_agencies = x17_how_would_you_describe_your_relationship_with_regulatory_agencies_e_g_kma_mttd_dvla,
+    fair_law_enforcement = x18_do_you_think_the_kma_and_mttd_enforce_road_and_transport_laws_fairly,
+    income_effect_congestion = x19_how_has_traffic_congestion_affected_your_income,
+    improvement_suggestions = x20_what_do_you_suggest_could_improve_transport_operations_and_mobility_in_kumasi,
+    suggest_new_roads = x20_what_do_you_suggest_could_improve_transport_operations_and_mobility_in_kumasi_a_construction_of_new_roads,
+    suggest_traffic_mgmt = x20_what_do_you_suggest_could_improve_transport_operations_and_mobility_in_kumasi_b_better_traffic_management,
+    suggest_parking = x20_what_do_you_suggest_could_improve_transport_operations_and_mobility_in_kumasi_c_more_parking_loading_spaces,
+    suggest_law_enforcement = x20_what_do_you_suggest_could_improve_transport_operations_and_mobility_in_kumasi_d_enforcement_of_traffic_laws,
+    suggest_reduce_hawking = x20_what_do_you_suggest_could_improve_transport_operations_and_mobility_in_kumasi_e_reduction_of_street_hawking,
+    suggest_other = x20_what_do_you_suggest_could_improve_transport_operations_and_mobility_in_kumasi_f_others
+  )
+
+# Additional cleaning for drivers dataset
+drivers_clean <- drivers_clean %>%
+  mutate(
+    # Remove trailing spaces and standardize format
+    across(where(is.character), str_trim),
+    
+    # Remove letter prefixes from categorical responses (e.g., "a. Male" -> "Male")
+    gender = str_remove(gender, "^[a-z]\\. "),
+    age_group = str_remove(age_group, "^[a-z]\\. "),
+    education_level = str_remove(education_level, "^[a-z]\\. "),
+    transport_service_type = str_remove(transport_service_type, "^[a-z]\\. "),
+    driving_experience_years = str_remove(driving_experience_years, "^[a-z]\\. "),
+    operation_area = str_remove(operation_area, "^[a-z]\\. "),
+    work_time = str_remove(work_time, "^[a-z]\\. "),
+    daily_trips = str_remove(daily_trips, "^[a-z]\\. "),
+    belongs_to_union = str_remove(belongs_to_union, "^[a-z]\\. "),
+    union_name = str_remove(union_name, "^[a-z]\\. "),
+    road_condition = str_remove(road_condition, "^[a-z]\\. "),
+    congestion_frequency = str_remove(congestion_frequency, "^[a-z]\\. "),
+    terminal_availability = str_remove(terminal_availability, "^[a-z]\\. "),
+    encounters_challenges_authorities = str_remove(encounters_challenges_authorities, "^[a-z]\\. "),
+    regulation_effectiveness = str_remove(regulation_effectiveness, "^[a-z]\\. "),
+    relationship_with_agencies = str_remove(relationship_with_agencies, "^[a-z]\\. "),
+    fair_law_enforcement = str_remove(fair_law_enforcement, "^[a-z]\\. "),
+    income_effect_congestion = str_remove(income_effect_congestion, "^[a-z]\\. "),
+    
+    # Convert binary responses to logical
+    belongs_to_union = case_when(
+      belongs_to_union == "Yes" ~ TRUE,
+      belongs_to_union == "No" ~ FALSE,
+      TRUE ~ NA
+    ),
+    encounters_challenges_authorities = case_when(
+      encounters_challenges_authorities == "Yes" ~ TRUE,
+      encounters_challenges_authorities == "No" ~ FALSE,
+      TRUE ~ NA
+    ),
+    fair_law_enforcement = case_when(
+      fair_law_enforcement == "Yes" ~ TRUE,
+      fair_law_enforcement == "No" ~ FALSE,
+      fair_law_enforcement == "Not sure" ~ NA,
+      TRUE ~ NA
+    )
+  )
+
+# ============================================================================
+# SAVE CLEANED DATASETS
+# ============================================================================
+
+
+
+# Optional: Save to CSV
+write.csv(passengers_clean, "passengers_clean.csv", row.names = FALSE)
+write.csv(drivers_clean, "drivers_clean.csv", row.names = FALSE)
+
+# Print summary
+cat("CLEANING COMPLETE!\n\n")
+cat("Passengers Dataset:\n")
+cat("  - Original columns:", ncol(passengers), "\n")
+cat("  - Cleaned columns:", ncol(passengers_clean), "\n")
+cat("  - Number of rows:", nrow(passengers_clean), "\n\n")
+
+cat("Drivers Dataset:\n")
+cat("  - Original columns:", ncol(drivers), "\n")
+cat("  - Cleaned columns:", ncol(drivers_clean), "\n")
+cat("  - Number of rows:", nrow(drivers_clean), "\n\n")
+
+# Display structure of cleaned datasets
+cat("Passengers Dataset Structure:\n")
+glimpse(passengers_clean)
+
+cat("\n\nDrivers Dataset Structure:\n")
+glimpse(drivers_clean)
+```
+
